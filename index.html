@@ -90,7 +90,7 @@
 						const ms = req['daily_online_time'][formatted] ?? 0;
 						
 						if (ms <= 0) {
-							timeLeft.innerHTML = `${dayjs.duration({ milliseconds: msDaily }).humanize(true)} <span class="font-bold">${serverNameInput.value}</span> will run out on daily limit.`;
+							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${dayjs.duration({ milliseconds: msDaily }).humanize()} left.`;
 						} else {
 							if (msDaily - ms <= 0) {
 								let oneAMPSTReset = dayjs().tz("America/Los_Angeles").startOf('day').add(1, 'hour').tz();
@@ -101,8 +101,8 @@
 								
 								timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}'s</span> daily time limit has run out. Daily limit resets at <pre><code class="p-1 px-2 bg-zinc-800">1 AM PST</code></pre> that would be <pre><code class="p-1 px-2 bg-zinc-800">${dayjs.duration(oneAMPSTReset.diff(dayjs())).humanize(true)}</code></pre> <pre><code class="p-1 px-2 bg-zinc-800">${oneAMPSTReset.format('hh:mm')}</code></pre> in your timezone.`;
 							} else {
-								const left = dayjs.duration({ milliseconds: msDaily - ms }).humanize(true);
-								timeLeft.innerHTML = `${left} <span class="font-bold">${serverNameInput.value}</span> will run out on daily limit.`;
+								const left = dayjs.duration({ milliseconds: msDaily - ms }).humanize();
+								timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${left} left.`;
 							}
 						}
 					} else {
