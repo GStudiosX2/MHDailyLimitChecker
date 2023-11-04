@@ -63,10 +63,15 @@
 			const serverNameInput = document.getElementById('server-name');
 			const checkTimeBtn = document.getElementById('check-time-btn');
 			const timeLeft = document.getElementById('timeLeft');
+			let interval = 0;
+			let name = '';
 			
 			document.getElementById('form').addEventListener('submit', (e) => {
 				e.preventDefault();
+				clearInterval(interval);
+				name = serverNameInput.value;
 				checkTimeLeft();
+				interval = setInterval(() => checkTimeLeft(), 5000);
 			});
 			
 			async function sendRequest() {
@@ -80,24 +85,19 @@
 						}
 					};
 				} else {
-					return (await fetch(`${API_URL}/server/${serverNameInput.value}?byName=true`)
+					return (await fetch(`${API_URL}/server/${name}?byName=true`)
 						.then((res) => res.json()))['server'];
 				}
 			}
 			
 			async function checkTimeLeft() {
-				if (checkTimeBtn.textContent === '...') {
-					return;
-				}
-				
-				if (serverNameInput.value.trim() === '' || serverNameInput.value.length === 0) {
+				if (name.trim() === '' || name.length === 0) {
 					timeLeft.classList.add('text-red-500');
 					timeLeft.textContent = 'You must enter a server name!';
 					return;
 				}
 				
 				timeLeft.classList.remove('text-red-500');
-				checkTimeBtn.textContent = '...';
 				
 				try {
 					const req = await sendRequest();
@@ -107,8 +107,10 @@
 					
 					const formatted = `${dayTime.date()}-${dayTime.month()}-${dayTime.year()}`;
 					if (req['server_plan'] === 'FREE') {
-						const ms = req['daily_online_time'][formatted] ?? 0;
-						
+						let ms = (req['daily_online_time'] && req['daily_online_time'][formatted]) ?? 0;
+						const now = new Date();
+						const timeSinceLastOnline = now.getTime() - req['last_online'];
+						if (req['online']) ms += timeSinceLastOnline;
 						let duration = dayjs.duration(msDaily - ms);
 						if ((msDaily - ms) <= 0) {
 							let oneAMPSTReset = dayjs().utc().startOf('day').add(8, 'hour').tz();
@@ -116,14 +118,14 @@
 								oneAMPSTReset = oneAMPSTReset.add(1, 'day');
 							duration = null;
 								
-							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}'s</span> daily time limit has run out. Daily limit resets at 
+							timeLeft.innerHTML = `<span class="font-bold">${name}'s</span> daily time limit has run out. Daily limit resets at 
 							<pre><code class="p-1 px-2 bg-zinc-700 rounded-sm">1 AM PST</code></pre> 
 							that would be 
 							<pre><code class="p-1 px-2 bg-zinc-700 rounded-sm" title="${oneAMPSTReset.format('hh:mm')}">${dayjs.duration(oneAMPSTReset.diff(dayjs())).humanize(true)}</code></pre> in your timezone.`;
 						}
 						
 						if (duration) {
-							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${("" + duration.hours()).padStart(2, '0')}h ${("" + duration.minutes()).padStart(2, '0')}m ${("" + duration.seconds()).padStart(2, '0')}s left.`;
+							timeLeft.innerHTML = `<span class="font-bold">${name}</span> has ${("" + duration.hours()).padStart(2, '0')}h ${("" + duration.minutes()).padStart(2, '0')}m ${("" + duration.seconds()).padStart(2, '0')}s left.`;
 						}
 					} else {
 						timeLeft.textContent = 'The daily limit only applies to FREE servers.';
@@ -133,9 +135,6 @@
 					timeLeft.classList.add('text-red-500');
 					timeLeft.textContent = 'Invalid server name!';
 				}
-				
-				checkTimeBtn.textContent = 'Check';
-				serverNameInput.value = '';
 			}
 		</script>
 	</body>
