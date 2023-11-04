@@ -86,7 +86,7 @@
 					const dayTime = dayjs(time);
 					
 					const formatted = `${dayTime.date()}-${dayTime.month()}-${dayTime.year()}`;
-					if (req['activeServerPlan'] || req['server_plan'] === 'FREE') {
+					if ((req['rawPlan'].trim() === '' ? req['server_plan'] : req['rawPlan']) === 'FREE') {
 						const ms = req['daily_online_time'][formatted] ?? 0;
 						
 						if (ms <= 0) {
@@ -113,7 +113,7 @@
 					timeLeft.textContent = 'Invalid server name!';
 				}
 				
-				checkTimeBtn.textContent = 'Check Time Left';
+				checkTimeBtn.textContent = 'Check';
 				serverNameInput.value = '';
 			}
 		</script>
