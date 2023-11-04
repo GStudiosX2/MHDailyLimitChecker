@@ -48,12 +48,22 @@
 				</div>
 				
 				<form id="form" class="flex flex-col gap-2 w-full">
-					<input id="server-name" name="serverName" class="px-4 py-2 bg-[#5d626e] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border" placeholder="Enter Server Name" autocomplete="off" />
+					<div class="flex flex-col md:flex-row gap-2">
+						<input id="server-name" name="serverName" class="flex-grow px-4 py-2 bg-[#5d626e] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border" placeholder="Enter Server Name" autocomplete="off" />
+						
+						<div class="flex flex-row md:flex-col gap-2 items-center justify-center">
+							<label class="text-sm flex-grow md:hidden" for="liveMode">Live Mode</label>
+							<input id="live-mode" name="liveMode" type="checkbox" class="w-6 h-6" title="Live Mode - Keeps track of the server statistics with a interval, updates every 5 seconds. Keep in mind this will request the Minehut API every 5 seconds." />
+						</div>
+					</div>
 					
 					<button type="submit" id="check-time-btn" class="px-4 py-2 bg-[#488aff] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border">Check</button>
 				</form>
 			</div>
 		</div>
+		
+		<style>
+		</style>
 		
 		<script>
 			const API_URL = 'https://api.minehut.com';
@@ -63,15 +73,34 @@
 			const serverNameInput = document.getElementById('server-name');
 			const checkTimeBtn = document.getElementById('check-time-btn');
 			const timeLeft = document.getElementById('timeLeft');
+			const liveModeCheckbox = document.getElementById('live-mode');
+			
 			let interval = 0;
 			let name = '';
+			let liveModeEnabled = localStorage.getItem('liveModeEnabled') 
+				? localStorage.getItem('liveModeEnabled') === 'true' 
+					? true 
+					: false 
+				: true;
+			
+			liveModeCheckbox.checked = liveModeEnabled;
+			liveModeCheckbox.addEventListener('change', (e) => {
+				liveModeEnabled = liveModeCheckbox.checked;
+				localStorage.setItem('liveModeEnabled', liveModeEnabled);
+			});	
 			
 			document.getElementById('form').addEventListener('submit', (e) => {
 				e.preventDefault();
+				
 				clearInterval(interval);
+				interval = setInterval(() => {
+					if (liveModeEnabled) {
+						checkTimeLeft();
+					}
+				}, 5000);
+				
 				name = serverNameInput.value;
 				checkTimeLeft();
-				interval = setInterval(() => checkTimeLeft(), 5000);
 			});
 			
 			async function sendRequest() {
@@ -100,17 +129,17 @@
 				timeLeft.classList.remove('text-red-500');
 				
 				try {
+					const now = new Date();
 					const req = await sendRequest();
-						
-					const time = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" })); //convert to PST
-					const dayTime = dayjs(time);
+					const dayTime = dayjs(now).set('hour', dayjs(now).hour() - 8); //convert to PST
 					
 					const formatted = `${dayTime.date()}-${dayTime.month()}-${dayTime.year()}`;
 					if (req['server_plan'] === 'FREE') {
 						let ms = (req['daily_online_time'] && req['daily_online_time'][formatted]) ?? 0;
-						const now = new Date();
+						
 						const timeSinceLastOnline = now.getTime() - req['last_online'];
 						if (req['online']) ms += timeSinceLastOnline;
+						
 						let duration = dayjs.duration(msDaily - ms);
 						if ((msDaily - ms) <= 0) {
 							let oneAMPSTReset = dayjs().utc().startOf('day').add(8, 'hour').tz();
@@ -131,7 +160,7 @@
 						timeLeft.textContent = 'The daily limit only applies to FREE servers.';
 					}
 				} catch (e) {
-					console.log(e);
+					console.error(e);
 					timeLeft.classList.add('text-red-500');
 					timeLeft.textContent = 'Invalid server name!';
 				}
