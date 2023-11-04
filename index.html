@@ -93,7 +93,7 @@
 							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${dayjs.duration({ milliseconds: msDaily }).humanize()} left.`;
 						} else {
 							if (msDaily - ms <= 0) {
-								let oneAMPSTReset = dayjs().tz("America/Los_Angeles").startOf('day').add(1, 'hour').tz();
+								let oneAMPSTReset = dayjs().tz("America/New_York").startOf('day').add(1, 'hour').tz();
 								
 								if (oneAMPSTReset.isBefore(dayjs())) {
 									oneAMPSTReset = oneAMPSTReset.add(1, 'day');
