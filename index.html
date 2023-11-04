@@ -58,6 +58,7 @@
 		<script>
 			const API_URL = 'https://api.minehut.com';
 			const msDaily = 14400 * 1000;
+			const searchParams = new URL(document.location).searchParams;
 			
 			const serverNameInput = document.getElementById('server-name');
 			const checkTimeBtn = document.getElementById('check-time-btn');
@@ -67,6 +68,22 @@
 				e.preventDefault();
 				checkTimeLeft();
 			});
+			
+			async function sendRequest() {
+				if ((window.location.origin === 'file://' || window.location.hostname.includes('localhost')) && 
+					searchParams.get('localhostSendRequest') === null) { // for testing purposes
+					const dayTime = dayjs(new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" })));
+					return { // all required fields
+						"server_plan": "FREE",
+						"daily_online_time": {
+							[`${dayTime.date()}-${dayTime.month()}-${dayTime.year()}`]: searchParams.get('localhostDailyOnlineTime') * 1000 || msDaily
+						}
+					};
+				} else {
+					return (await fetch(`${API_URL}/server/${serverNameInput.value}?byName=true`)
+						.then((res) => res.json()))['server'];
+				}
+			}
 			
 			async function checkTimeLeft() {
 				if (checkTimeBtn.textContent === '...') {
@@ -83,36 +100,36 @@
 				checkTimeBtn.textContent = '...';
 				
 				try {
-					const req = (await fetch(`${API_URL}/server/${serverNameInput.value}?byName=true`)
-						.then((res) => res.json()))['server'];
+					const req = await sendRequest();
 						
 					const time = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" })); //convert to PST
 					const dayTime = dayjs(time);
 					
 					const formatted = `${dayTime.date()}-${dayTime.month()}-${dayTime.year()}`;
-					if ((req['rawPlan'].trim() === '' ? req['server_plan'] : req['rawPlan']) === 'FREE') {
+					if (req['server_plan'] === 'FREE') {
 						const ms = req['daily_online_time'][formatted] ?? 0;
 						
-						if (ms <= 0) {
-							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${dayjs.duration({ milliseconds: msDaily }).humanize()} left.`;
-						} else {
-							if (msDaily - ms <= 0) {
-								let oneAMPSTReset = dayjs().tz("America/New_York").startOf('day').add(1, 'hour').tz();
+						let duration = dayjs.duration(msDaily - ms);
+						if ((msDaily - ms) <= 0) {
+							let oneAMPSTReset = dayjs().utc().startOf('day').add(8, 'hour').tz();
+							if (oneAMPSTReset.isBefore(dayjs())) 
+								oneAMPSTReset = oneAMPSTReset.add(1, 'day');
+							duration = null;
 								
-								if (oneAMPSTReset.isBefore(dayjs())) {
-									oneAMPSTReset = oneAMPSTReset.add(1, 'day');
-								}
-								
-								timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}'s</span> daily time limit has run out. Daily limit resets at <pre><code class="p-1 px-2 bg-zinc-800">1 AM PST</code></pre> that would be <pre><code class="p-1 px-2 bg-zinc-800">${dayjs.duration(oneAMPSTReset.diff(dayjs())).humanize(true)}</code></pre> <pre><code class="p-1 px-2 bg-zinc-800">${oneAMPSTReset.format('hh:mm')}</code></pre> in your timezone.`;
-							} else {
-								const left = dayjs.duration({ milliseconds: msDaily - ms }).humanize();
-								timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${left} left.`;
-							}
+							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}'s</span> daily time limit has run out. Daily limit resets at 
+							<pre><code class="p-1 px-2 bg-zinc-700 rounded-sm">1 AM PST</code></pre> 
+							that would be 
+							<pre><code class="p-1 px-2 bg-zinc-700 rounded-sm" title="${oneAMPSTReset.format('hh:mm')}">${dayjs.duration(oneAMPSTReset.diff(dayjs())).humanize(true)}</code></pre> in your timezone.`;
+						}
+						
+						if (duration) {
+							timeLeft.innerHTML = `<span class="font-bold">${serverNameInput.value}</span> has ${("" + duration.hours()).padStart(2, '0')}h ${("" + duration.minutes()).padStart(2, '0')}m ${("" + duration.seconds()).padStart(2, '0')}s left.`;
 						}
 					} else {
 						timeLeft.textContent = 'The daily limit only applies to FREE servers.';
 					}
 				} catch (e) {
+					console.log(e);
 					timeLeft.classList.add('text-red-500');
 					timeLeft.textContent = 'Invalid server name!';
 				}
