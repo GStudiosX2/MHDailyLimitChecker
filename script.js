@@ -1,6 +1,6 @@
 const IS_LOCAL = (window.location.origin === 'file://' || window.location.hostname.includes('localhost')),
 	API_URL = 'https://api.minehut.com',
-	MS_DAILY = 14400 * 1000,
+	MS_DAILY = 7200 * 1000,
 	INTERVAL_LIVE_MODE = 5000, // 5 seconds
 	INFO_MESSAGE = document.getElementById('timeLeft');
 let name;
