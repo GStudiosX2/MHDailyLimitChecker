@@ -1,67 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-	<head>
-		<title>Minehut Server Daily Limit Checker</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		
-		<script src="https://cdn.tailwindcss.com"></script>
-		
-		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
-		
-		<script>
-			dayjs.extend(window.dayjs_plugin_utc);
-			dayjs.extend(window.dayjs_plugin_relativeTime);
-			dayjs.extend(window.dayjs_plugin_timezone);
-			dayjs.extend(window.dayjs_plugin_duration);
-			
-			dayjs.tz.guess();
-		</script>
-		
-		<script src="./script.js" defer></script>
-	</head>
-	<body class="bg-zinc-900 h-screen h-[100svh] text-zinc-200 font-sans">
-		<noscript>
-			<strong>This page does not work without javascript enabled.</strong>
-		</noscript>
-		
-		<div class="flex justify-center items-center w-full h-full">
-			<div class="p-4 bg-zinc-800 flex flex-col gap-2 rounded-md w-full h-full justify-center md:justify-start md:h-auto md:w-1/2 xl:w-1/3">
-				<span class="font-bold text-2xl">Minehut Server Daily Limit Checker</span>
-				<span class="border-l-4 border-yellow-700 px-4 mt-2 italic">
-					<span class="font-bold">WARNING!</span> This is not by Minehut/SLE/SLG. I am not affiliated with Minehut/SLE/SLG although this does use the Minehut API, it may not be accurate and I do not know when the API updates.
-				</span>
-				
-				<span class="border-l-4 border-red-700 px-4 mt-2 italic">
-					Also, this can break at anytime if they update their API so you can't really rely on this but i'll try and keep it working.
-				</span>
-				
-				<span class="py-2">
-					This let's you check how much time left you can play on your server, since Minehut added a daily time limit for free plans.
-				</span>
-				
-				<div class="py-2 flex justify-center">
-					<span id="timeLeft" class="flex flex-wrap gap-1 text-lg text-center">
-						Press "Check" after inputting a server name.
-					</span>
-				</div>
-				
-				<form id="form" class="flex flex-col gap-2 w-full">
-					<div class="flex flex-col md:flex-row gap-2">
-						<input id="server-name" name="serverName" class="flex-grow px-4 py-2 bg-[#5d626e] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border" placeholder="Enter Server Name" autocomplete="off" />
-						
-						<div class="flex flex-row md:flex-col gap-2 items-center justify-center">
-							<label class="text-sm flex-grow md:hidden" for="liveMode">Live Mode</label>
-							<input id="live-mode" name="liveMode" type="checkbox" class="w-6 h-6" title="Live Mode - Keeps track of the server statistics with a interval, updates every 5 seconds. Keep in mind this will request the Minehut API every 5 seconds." />
-						</div>
-					</div>
-					
-					<button type="submit" id="check-time-btn" class="px-4 py-2 bg-[#488aff] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border">Check</button>
-				</form>
-			</div>
-		</div>
-	</body>
+  <head>
+    <title>Minehut Server Daily Limit Checker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
+
+    <script>
+      dayjs.extend(window.dayjs_plugin_utc);
+      dayjs.extend(window.dayjs_plugin_relativeTime);
+      dayjs.extend(window.dayjs_plugin_timezone);
+      dayjs.extend(window.dayjs_plugin_duration);
+
+      dayjs.tz.guess();
+    </script>
+
+    <script src="./script.js" defer></script>
+  </head>
+  <body class="bg-zinc-900 h-dvh text-zinc-200 font-sans">
+    <noscript>
+      <strong>This page does not work without javascript enabled.</strong>
+    </noscript>
+
+    <div class="flex justify-center items-center w-full h-full">
+      <div
+        class="p-4 bg-zinc-800 flex flex-col gap-2 rounded-md w-full h-full justify-center md:justify-start md:h-auto md:w-1/2 xl:w-1/3"
+      >
+        <span class="font-bold text-2xl"
+          >Minehut Server Daily Limit Checker</span
+        >
+        <span class="border-l-4 border-yellow-700 px-4 mt-2 italic">
+          <span class="font-bold">WARNING!</span> This is not by
+          Minehut/SLE/SLG. I am not affiliated with Minehut/SLE/SLG although
+          this does use the Minehut API, it may not be accurate and I do not
+          know when the API updates.
+        </span>
+
+        <span class="border-l-4 border-red-700 px-4 mt-2 italic">
+          Also, this can break at anytime if they update their API so you can't
+          really rely on this but i'll try and keep it working.
+        </span>
+
+        <span class="py-2">
+          This let's you check how much time left you can play on your server,
+          since Minehut added a daily time limit for free plans.
+        </span>
+
+        <div class="py-2 flex justify-center">
+          <span id="timeLeft" class="flex flex-wrap gap-1 text-lg text-center">
+            Press "Check" after inputting a server name.
+          </span>
+        </div>
+
+        <form id="form" class="flex flex-col gap-2 w-full">
+          <div class="flex flex-col md:flex-row gap-2">
+            <input
+              id="server-name"
+              name="serverName"
+              class="flex-grow px-4 py-2 bg-[#5d626e] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border"
+              placeholder="Enter Server Name"
+              autocomplete="off"
+            />
+
+            <div
+              class="flex flex-row md:flex-col gap-2 items-center justify-center"
+            >
+              <label class="text-sm flex-grow md:hidden" for="liveMode"
+                >Live Mode</label
+              >
+              <input
+                id="live-mode"
+                name="liveMode"
+                type="checkbox"
+                class="w-6 h-6"
+                title="Live Mode - Keeps track of the server statistics with a interval, updates every 5 seconds. Keep in mind this will request the Minehut API every 5 seconds."
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            id="check-time-btn"
+            class="px-4 py-2 bg-[#488aff] rounded-md outline-none border-2 border-transparent focus-within:border-white focus-within:border-opacity-75 box-border"
+          >
+            Check
+          </button>
+        </form>
+        <div>
+          <div class="flex flex-row justify-between py-1 text-xl">
+            <p>Your Recent Checked Out Servers</p>
+            <button id="clearRecent">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="flex flex-col gap-2" id="recent">None</div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
