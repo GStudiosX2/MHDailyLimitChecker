@@ -1,0 +1,2 @@
+Minehut for a while now displays how long you have left of your daily limit on your dashboard and more recently they don't like people using, accessing the API so even though this might still work (not sure about with boosts)
+there's probably a possibility this project could get taken down it's only useful kinda to check what time limit is left of a server you don't own but I'm archiving the project on Github and I dont recommend this to be used.
